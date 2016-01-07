@@ -58,6 +58,10 @@
 
 	var _reactAddonsLinkedStateMixin2 = _interopRequireDefault(_reactAddonsLinkedStateMixin);
 
+	var _wrestlerlist = __webpack_require__(163);
+
+	var _wrestlerlist2 = _interopRequireDefault(_wrestlerlist);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var Header = _react2.default.createClass({
@@ -194,6 +198,47 @@
 	  }
 	});
 
+	var ErrorView = _react2.default.createClass({
+	  displayName: 'ErrorView',
+
+	  propTypes: {
+	    restart: _react2.default.PropTypes.func
+	  },
+
+	  render: function render() {
+	    return _react2.default.createElement(
+	      'div',
+	      null,
+	      _react2.default.createElement(
+	        'h2',
+	        null,
+	        ' Someone made a mistake!'
+	      ),
+	      _react2.default.createElement(
+	        'h2',
+	        null,
+	        'We\'re gonna go ahead and blame it on YOU!! '
+	      ),
+	      _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement('img', { src: 'https://media.giphy.com/media/l41lO8vRXzSB0CkqQ/giphy.gif', alt: 'angry umpire dude ' })
+	      ),
+	      _react2.default.createElement('br', null),
+	      _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(
+	          'button',
+	          { onClick: this.props.restart, className: 'button-xlarge pure-button bottom-button' },
+	          ' try again'
+	        )
+	      )
+	    );
+	  }
+
+	});
+
 	var FormView = _react2.default.createClass({
 	  displayName: 'FormView',
 
@@ -206,7 +251,6 @@
 	  },
 
 	  getInitialState: function getInitialState() {
-
 	    return {
 	      query1: undefined,
 	      query1: undefined
@@ -243,7 +287,7 @@
 	            _react2.default.createElement(
 	              'div',
 	              { className: 'img-container' },
-	              _react2.default.createElement('img', { src: this.props.img1.neutral })
+	              _react2.default.createElement('img', { src: this.props.img1.challenger })
 	            ),
 	            _react2.default.createElement('input', { id: 'author1', valueLink: this.linkState('query1'), placeholder: 'last, first middle initial' })
 	          ),
@@ -262,7 +306,7 @@
 	            _react2.default.createElement(
 	              'div',
 	              { className: 'img-container' },
-	              _react2.default.createElement('img', { src: this.props.img2.neutral })
+	              _react2.default.createElement('img', { src: this.props.img2.challenger })
 	            ),
 	            _react2.default.createElement('input', { id: 'author2', valueLink: this.linkState('query2'), placeholder: 'last, first middle initial' })
 	          )
@@ -391,15 +435,7 @@
 	  getRandomImages: function getRandomImages() {
 
 	    //get some image sets
-	    var imageList = [{
-	      neutral: "https://imgur.com/RLCrOUv.jpg",
-	      winner: "https://imgur.com/RLCrOUv.jpg",
-	      loser: "https://imgur.com/RLCrOUv.jpg"
-	    }, {
-	      neutral: "https://imgur.com/RLCrOUv.jpg",
-	      winner: "https://imgur.com/RLCrOUv.jpg",
-	      loser: "https://imgur.com/RLCrOUv.jpg"
-	    }];
+	    var imageList = _wrestlerlist2.default.slice();
 
 	    var img1Index = parseInt(Math.random() * imageList.length);
 	    var img1 = imageList[img1Index];
@@ -414,7 +450,7 @@
 	    var images = this.getRandomImages();
 
 	    return {
-	      //can also be "results" or "loading"
+	      //can also be "results" or "error"
 	      view: "form",
 	      resultData: undefined,
 	      img1: images[0],
@@ -435,12 +471,16 @@
 	  },
 
 	  render: function render() {
+	    var view;
+
 	    if (this.state.view === "form") {
-	      var view = _react2.default.createElement(FormView, { postData: this.postData, img1: this.state.img1, img2: this.state.img2 });
+	      view = _react2.default.createElement(FormView, { postData: this.postData, img1: this.state.img1, img2: this.state.img2 });
 	    } else if (this.state.view === "loading") {
-	      var view = _react2.default.createElement(FormView, { postData: this.postData, img1: this.state.img1, img2: this.state.img2, loading: true });
-	    } else {
-	      var view = _react2.default.createElement(ResultsView, { data: this.state.resultData, restart: this.restart, img1: this.state.img1, img2: this.state.img2 });
+	      view = _react2.default.createElement(FormView, { postData: this.postData, img1: this.state.img1, img2: this.state.img2, loading: true });
+	    } else if (this.state.view === "result") {
+	      view = _react2.default.createElement(ResultsView, { data: this.state.resultData, restart: this.restart, img1: this.state.img1, img2: this.state.img2 });
+	    } else if (this.state.view === "error") {
+	      view = _react2.default.createElement(ErrorView, { restart: this.restart });
 	    }
 	    return _react2.default.createElement(
 	      'div',
@@ -482,39 +522,40 @@
 	    };
 
 	    //ajax request
-	    // var r = new XMLHttpRequest();
-	    // r.open("POST", "/smackdown", true);
-	    //
-	    // r.onreadystatechange = function () {
-	    // 	if (r.readyState != 4 || r.status != 200){
-	    //     console.error("problem with the service", r);
-	    //     return
-	    //   };
-	    //   var returnedJSON = JSON.parse(r.responseText);
-	    //
-	    //   resultData.author1.riq = returnedJSON.author1.riq;
-	    //   resultData.author2.riq = returnedJSON.author2.riq;
-	    //
-	    //   that.setState({
-	    //     resultData :resultData,
-	    //     view : "results"
-	    //   });
-	    //
-	    // };
-	    //
-	    // r.send();
+	    var r = new XMLHttpRequest();
+	    r.open("POST", "/smackdown", true);
+
+	    r.onreadystatechange = function () {
+	      if (r.readyState != 4 || r.status != 200) {
+	        that.setState({
+	          view: "error"
+	        });
+	        return;
+	      };
+	      var returnedJSON = JSON.parse(r.responseText);
+
+	      resultData.author1.riq = returnedJSON.author1.riq;
+	      resultData.author2.riq = returnedJSON.author2.riq;
+
+	      that.setState({
+	        resultData: resultData,
+	        view: "results"
+	      });
+	    };
+
+	    r.send(data);
 	    //end ajax request
 
 	    //for testing
-	    resultData.author1.riq = 5;
-	    resultData.author2.riq = 7;
-
-	    setTimeout(function () {
-	      that.setState({
-	        resultData: resultData,
-	        view: "result"
-	      });
-	    }, 2000);
+	    // resultData.author1.riq = 5;
+	    // resultData.author2.riq = 7;
+	    //
+	    // setTimeout(function(){
+	    //   that.setState({
+	    //     resultData : resultData,
+	    //     view : "result"
+	    //   });
+	    // }, 1000);
 	  }
 
 	});
@@ -20345,6 +20386,71 @@
 	};
 
 	module.exports = ReactStateSetters;
+
+/***/ },
+/* 163 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	var wrestlerList = [{
+	  "name": "The Rock",
+	  "challenger": "http://imgur.com/otGOV6Q.jpg",
+	  "winner": "http://imgur.com/Arey1w6.jpg",
+	  "loser": "http://imgur.com/9KwkTK5.jpg"
+	}, {
+	  "name": "Stone Cold Steve Austin",
+	  "challenger": "http://imgur.com/OpE2O30.jpg",
+	  "winner": "http://imgur.com/2Abo1r5.jpg",
+	  "loser": "http://imgur.com/1RVDF2E.jpg"
+	}, {
+	  "name": "The Undetaker",
+	  "challenger": "http://imgur.com/0jKmvDB.jpg",
+	  "winner": "http://imgur.com/pnhgdSt.jpg",
+	  "loser": "http://imgur.com/2U9rPvu.jpg"
+	}, {
+	  "name": "Kane",
+	  "challenger": "http://imgur.com/qAYkPM2.jpg",
+	  "winner": "http://imgur.com/fb4xfkS.jpg",
+	  "loser": "http://imgur.com/rdfZTh4.jpg"
+	}, {
+	  "name": "Kurt Angle",
+	  "challenger": "http://imgur.com/TjNmp8l.jpg",
+	  "winner": "http://imgur.com/DC1GA4a.jpg",
+	  "loser": "http://imgur.com/o2tLPBI.jpg"
+	}, {
+	  "name": "Hulk Hogan",
+	  "challenger": "http://imgur.com/dzOIdjb.jpg",
+	  "winner": "http://imgur.com/MMq5ot2.jpg",
+	  "loser": "http://imgur.com/oGDHxXU.jpg"
+	}, {
+	  "name": "British Bulldog",
+	  "challenger": "http://imgur.com/VDPxUyb.jpg",
+	  "winner": "http://imgur.com/arfwnTL.jpg.jpg",
+	  "loser": "http://imgur.com/w59GIQd.jpg.jpg"
+	}, {
+	  "name": "The Big Show",
+	  "challenger": "http://imgur.com/1OvNCqg.jpg",
+	  "winner": "http://imgur.com/6wjvjyy.jpg",
+	  "loser": "http://imgur.com/XnHcoF1.jpg"
+	}, {
+	  "name": "John Cena",
+	  "challenger": "http://imgur.com/FYdA4p1.jpg",
+	  "winner": "http://imgur.com/seCFNY5.jpg",
+	  "loser": "http://imgur.com/pArF89E.jpg"
+	}, {
+	  "name": "Mankind",
+	  "challenger": "http://imgur.com/7wEjbXH.jpg",
+	  "winner": "http://imgur.com/toihedM.jpg",
+	  "loser": "http://imgur.com/8PltFoo.jpg"
+	}, {
+	  "name": "Brock Lesnar",
+	  "challenger": "http://imgur.com/Lok2RNI.jpg",
+	  "winner": "http://imgur.com/Vj5VxiS.jpg",
+	  "loser": "http://imgur.com/puUTyqF.jpg"
+	}];
+
+	module.exports = wrestlerList;
 
 /***/ }
 /******/ ]);

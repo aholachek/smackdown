@@ -308,7 +308,7 @@ var ErrorView = React.createClass({
 
       };
 
-      r.send();
+      r.send(data);
       //end ajax request
 
 
