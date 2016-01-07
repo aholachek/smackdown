@@ -50,6 +50,14 @@ var Footer = React.createClass({
           </li>
           <li>
             <div>
+              <b>Q: TUBULAR! But can I limit to first author?</b>
+            </div>
+            <div>
+              A: Sure, just put a caret right before the last name in the input field
+            </div>
+          </li>
+          <li>
+            <div>
               <b>Q: OK! Where can I learn more about the riq index?</b>
             </div>
             <div>
@@ -99,7 +107,7 @@ var ErrorView = React.createClass({
     getInitialState : function(){
         return {
           query1 : undefined,
-          query1 : undefined
+          query2 : undefined
         }
     },
 
@@ -213,7 +221,7 @@ var ErrorView = React.createClass({
       var images = this.getRandomImages();
 
       return {
-        //can also be "results" or "error"
+        //can also be "result" or "error"
         view : "form",
         resultData : undefined,
         img1 : images[0],
@@ -261,6 +269,12 @@ var ErrorView = React.createClass({
 
     postData : function(data){
 
+      //requires formatting for solr
+      var solrQueryData = {
+        query1 : 'author:"' + data.query1 + '"',
+        query2 : 'author:"' + data.query2 + '"'
+      };
+
       //show loading view
       this.setState({
         view : "loading"
@@ -290,12 +304,20 @@ var ErrorView = React.createClass({
       r.open("POST", "/smackdown", true);
 
       r.onreadystatechange = function () {
-      	if (r.readyState != 4 || r.status != 200){
+
+        //still waiting for data request to complete, just return
+        if (r.readyState !== 4) {
+          return
+        }
+
+        //there was an error, and data has returned incorrectly
+      	if (r.status != 200){
           that.setState({
             view : "error"
           })
           return
-        };
+        }
+
         var returnedJSON = JSON.parse(r.responseText);
 
         resultData.author1.riq = returnedJSON.author1.riq;
@@ -303,12 +325,12 @@ var ErrorView = React.createClass({
 
         that.setState({
           resultData :resultData,
-          view : "results"
+          view : "result"
         });
 
       };
 
-      r.send(data);
+      r.send(JSON.stringify(solrQueryData));
       //end ajax request
 
 

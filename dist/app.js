@@ -179,6 +179,24 @@
 	            _react2.default.createElement(
 	              'b',
 	              null,
+	              'Q: TUBULAR! But can I limit to first author?'
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            null,
+	            'A: Sure, just put a caret right before the last name in the input field'
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'li',
+	          null,
+	          _react2.default.createElement(
+	            'div',
+	            null,
+	            _react2.default.createElement(
+	              'b',
+	              null,
 	              'Q: OK! Where can I learn more about the riq index?'
 	            )
 	          ),
@@ -253,7 +271,7 @@
 	  getInitialState: function getInitialState() {
 	    return {
 	      query1: undefined,
-	      query1: undefined
+	      query2: undefined
 	    };
 	  },
 
@@ -450,7 +468,7 @@
 	    var images = this.getRandomImages();
 
 	    return {
-	      //can also be "results" or "error"
+	      //can also be "result" or "error"
 	      view: "form",
 	      resultData: undefined,
 	      img1: images[0],
@@ -497,6 +515,12 @@
 
 	  postData: function postData(data) {
 
+	    //requires formatting for solr
+	    var solrQueryData = {
+	      query1: 'author:"' + data.query1 + '"',
+	      query2: 'author:"' + data.query2 + '"'
+	    };
+
 	    //show loading view
 	    this.setState({
 	      view: "loading"
@@ -526,12 +550,20 @@
 	    r.open("POST", "/smackdown", true);
 
 	    r.onreadystatechange = function () {
-	      if (r.readyState != 4 || r.status != 200) {
+
+	      //still waiting for data request to complete, just return
+	      if (r.readyState !== 4) {
+	        return;
+	      }
+
+	      //there was an error, and data has returned incorrectly
+	      if (r.status != 200) {
 	        that.setState({
 	          view: "error"
 	        });
 	        return;
-	      };
+	      }
+
 	      var returnedJSON = JSON.parse(r.responseText);
 
 	      resultData.author1.riq = returnedJSON.author1.riq;
@@ -539,11 +571,11 @@
 
 	      that.setState({
 	        resultData: resultData,
-	        view: "results"
+	        view: "result"
 	      });
 	    };
 
-	    r.send(data);
+	    r.send(JSON.stringify(solrQueryData));
 	    //end ajax request
 
 	    //for testing
