@@ -285,34 +285,30 @@ var ErrorView = React.createClass({
       }
     };
 
-    that.setState({
-      view : "error"
-    })
-
     //ajax request
-      // var r = new XMLHttpRequest();
-      // r.open("POST", "/smackdown", true);
-      //
-      // r.onreadystatechange = function () {
-      // 	if (r.readyState != 4 || r.status != 200){
-      //     that.setState({
-      //       view : "error"
-      //     })
-      //     return
-      //   };
-      //   var returnedJSON = JSON.parse(r.responseText);
-      //
-      //   resultData.author1.riq = returnedJSON.author1.riq;
-      //   resultData.author2.riq = returnedJSON.author2.riq;
-      //
-      //   that.setState({
-      //     resultData :resultData,
-      //     view : "results"
-      //   });
-      //
-      // };
-      //
-      // r.send();
+      var r = new XMLHttpRequest();
+      r.open("POST", "/smackdown", true);
+
+      r.onreadystatechange = function () {
+      	if (r.readyState != 4 || r.status != 200){
+          that.setState({
+            view : "error"
+          })
+          return
+        };
+        var returnedJSON = JSON.parse(r.responseText);
+
+        resultData.author1.riq = returnedJSON.author1.riq;
+        resultData.author2.riq = returnedJSON.author2.riq;
+
+        that.setState({
+          resultData :resultData,
+          view : "results"
+        });
+
+      };
+
+      r.send();
       //end ajax request
 
 
