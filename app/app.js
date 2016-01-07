@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
+import wrestlerList from './wrestlerlist.js';
 
 
 var Header = React.createClass({
@@ -61,6 +62,26 @@ var Footer = React.createClass({
   }
 })
 
+var ErrorView = React.createClass({
+
+  propTypes : {
+    restart : React.PropTypes.func
+  },
+
+  render : function() {
+    return (
+      <div>
+          SOMEONE MADE A MISTAKE!!!
+        <div>
+          <img src="https://media.giphy.com/media/l41lO8vRXzSB0CkqQ/giphy.gif" alt="angry umpire dude "/>
+            <button onClick={this.props.restart} className="bottom-button"> try again</button>
+        </div>
+      </div>
+    )
+}
+
+});
+
   var FormView = React.createClass({
 
     mixins: [LinkedStateMixin],
@@ -72,12 +93,10 @@ var Footer = React.createClass({
     },
 
     getInitialState : function(){
-
         return {
           query1 : undefined,
           query1 : undefined
         }
-
     },
 
     render : function(){
@@ -93,14 +112,14 @@ var Footer = React.createClass({
           <div className="col-1">
               <label htmlFor="author1"><h3>{label1Name}</h3></label>
               <div className="img-container">
-                <img src={this.props.img1.neutral}></img>
+                <img src={this.props.img1.challenger}></img>
               </div>
               <input id="author1"  valueLink={this.linkState('query1')} placeholder="last, first middle initial"></input>
           </div>
           <div className="col-2">
               <label htmlFor="author2"><h3>{label2Name}</h3></label>
               <div className="img-container">
-                <img src={this.props.img2.neutral}></img>
+                <img src={this.props.img2.challenger}></img>
               </div>
               <input id="author2"  valueLink={this.linkState('query2')} placeholder="last, first middle initial"></input>
           </div>
@@ -174,19 +193,8 @@ var Footer = React.createClass({
 
     getRandomImages : function(){
 
-    //get some image sets
-    var imageList =  [
-      {
-        neutral : "https://imgur.com/RLCrOUv.jpg",
-        winner : "https://imgur.com/RLCrOUv.jpg",
-        loser :  "https://imgur.com/RLCrOUv.jpg",
-      },
-      {
-        neutral : "https://imgur.com/RLCrOUv.jpg",
-        winner : "https://imgur.com/RLCrOUv.jpg",
-        loser :  "https://imgur.com/RLCrOUv.jpg",
-      }
-     ];
+      //get some image sets
+      var imageList =  wrestlerList.slice();
 
       var img1Index = parseInt(Math.random() * (imageList.length));
       var img1 = imageList[img1Index];
@@ -201,7 +209,7 @@ var Footer = React.createClass({
       var images = this.getRandomImages();
 
       return {
-        //can also be "results" or "loading"
+        //can also be "results" or "error"
         view : "form",
         resultData : undefined,
         img1 : images[0],
@@ -222,21 +230,26 @@ var Footer = React.createClass({
     },
 
     render: function() {
+      var view;
+      
       if (this.state.view === "form"){
-      var view = (<FormView postData = {this.postData} img1={this.state.img1} img2={this.state.img2}  />);
+        view = (<FormView postData = {this.postData} img1={this.state.img1} img2={this.state.img2}  />);
       }
       else if (this.state.view === "loading"){
-        var view = (<FormView postData = {this.postData} img1={this.state.img1} img2={this.state.img2} loading={true} />);
+        view = (<FormView postData = {this.postData} img1={this.state.img1} img2={this.state.img2} loading={true} />);
       }
-      else {
-        var view = (<ResultsView data = {this.state.resultData} restart = {this.restart} img1={this.state.img1} img2={this.state.img2} />);
+      else  if  (this.state.view === "result"){
+        view = (<ResultsView data = {this.state.resultData} restart = {this.restart} img1={this.state.img1} img2={this.state.img2} />);
+      }
+      else if (this.state.view === "error"){
+        view = (<ErrorView restart = {this.restart} />);
       }
       return (
         <div>
           <Header/>
-          <main>
-          {view}
-          </main>
+            <main>
+              {view}
+            </main>
           <Footer/>
         </div>
       )
@@ -269,39 +282,42 @@ var Footer = React.createClass({
     };
 
     //ajax request
-      // var r = new XMLHttpRequest();
-      // r.open("POST", "/smackdown", true);
-      //
-      // r.onreadystatechange = function () {
-      // 	if (r.readyState != 4 || r.status != 200){
-      //     console.error("problem with the service", r);
-      //     return
-      //   };
-      //   var returnedJSON = JSON.parse(r.responseText);
-      //
-      //   resultData.author1.riq = returnedJSON.author1.riq;
-      //   resultData.author2.riq = returnedJSON.author2.riq;
-      //
-      //   that.setState({
-      //     resultData :resultData,
-      //     view : "results"
-      //   });
-      //
-      // };
-      //
-      // r.send();
+      var r = new XMLHttpRequest();
+      r.open("POST", "/smackdown", true);
+
+      r.onreadystatechange = function () {
+      	if (r.readyState != 4 || r.status != 200){
+          that.setState({
+            view : "error"
+          })
+          return
+        };
+        var returnedJSON = JSON.parse(r.responseText);
+
+        resultData.author1.riq = returnedJSON.author1.riq;
+        resultData.author2.riq = returnedJSON.author2.riq;
+
+        that.setState({
+          resultData :resultData,
+          view : "results"
+        });
+
+      };
+
+      r.send();
       //end ajax request
 
-      //for testing
-      resultData.author1.riq = 5;
-      resultData.author2.riq = 7;
 
-      setTimeout(function(){
-        that.setState({
-          resultData : resultData,
-          view : "result"
-        });
-      }, 2000);
+      //for testing
+      // resultData.author1.riq = 5;
+      // resultData.author2.riq = 7;
+      //
+      // setTimeout(function(){
+      //   that.setState({
+      //     resultData : resultData,
+      //     view : "result"
+      //   });
+      // }, 1000);
 
     }
 
