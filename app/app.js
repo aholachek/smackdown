@@ -71,10 +71,14 @@ var ErrorView = React.createClass({
   render : function() {
     return (
       <div>
-          SOMEONE MADE A MISTAKE!!!
+          <h2> Someone made a mistake!</h2>
+          <h2>We're gonna go ahead and blame it on YOU!! </h2>
         <div>
           <img src="https://media.giphy.com/media/l41lO8vRXzSB0CkqQ/giphy.gif" alt="angry umpire dude "/>
-            <button onClick={this.props.restart} className="bottom-button"> try again</button>
+        </div>
+        <br/>
+        <div>
+          <button onClick={this.props.restart} className="button-xlarge pure-button bottom-button"> try again</button>
         </div>
       </div>
     )
@@ -231,7 +235,7 @@ var ErrorView = React.createClass({
 
     render: function() {
       var view;
-      
+
       if (this.state.view === "form"){
         view = (<FormView postData = {this.postData} img1={this.state.img1} img2={this.state.img2}  />);
       }
@@ -281,30 +285,34 @@ var ErrorView = React.createClass({
       }
     };
 
+    that.setState({
+      view : "error"
+    })
+
     //ajax request
-      var r = new XMLHttpRequest();
-      r.open("POST", "/smackdown", true);
-
-      r.onreadystatechange = function () {
-      	if (r.readyState != 4 || r.status != 200){
-          that.setState({
-            view : "error"
-          })
-          return
-        };
-        var returnedJSON = JSON.parse(r.responseText);
-
-        resultData.author1.riq = returnedJSON.author1.riq;
-        resultData.author2.riq = returnedJSON.author2.riq;
-
-        that.setState({
-          resultData :resultData,
-          view : "results"
-        });
-
-      };
-
-      r.send();
+      // var r = new XMLHttpRequest();
+      // r.open("POST", "/smackdown", true);
+      //
+      // r.onreadystatechange = function () {
+      // 	if (r.readyState != 4 || r.status != 200){
+      //     that.setState({
+      //       view : "error"
+      //     })
+      //     return
+      //   };
+      //   var returnedJSON = JSON.parse(r.responseText);
+      //
+      //   resultData.author1.riq = returnedJSON.author1.riq;
+      //   resultData.author2.riq = returnedJSON.author2.riq;
+      //
+      //   that.setState({
+      //     resultData :resultData,
+      //     view : "results"
+      //   });
+      //
+      // };
+      //
+      // r.send();
       //end ajax request
 
 
